@@ -3,6 +3,8 @@ import java.util.Scanner;
 import java.io.IOException;
 
 interface Aeronava {
+	abstract String getName();
+
 	abstract String getType();
 
 	abstract String[] getLocation();
@@ -70,6 +72,10 @@ interface Stocare {
 	abstract String getNumber();
 
 	abstract boolean addAeronava(Aeronava a);
+
+	abstract int getNrAeronave();
+
+	abstract void printAeronave();
 }
 
 class Hangar implements Stocare {
@@ -85,6 +91,10 @@ class Hangar implements Stocare {
 
 	public String getType() {
 		return "Hangar";
+	}
+
+	public int getNrAeronave() {
+		return this.nrAeronave;
 	}
 
 	public String getNumber() {
@@ -108,6 +118,12 @@ class Hangar implements Stocare {
 		this.nrAeronave++;
 		return true;
 	}
+
+	public void printAeronave() {
+		System.out.println(getType() + " " + getNumber() + " are: ");
+		for (int i = 0; i < this.nrAeronave; i++)
+			System.out.println(aeronave[i].getName() + " " + aeronave[i].getType());
+	}
 }
 
 class Pista implements Stocare {
@@ -129,6 +145,10 @@ class Pista implements Stocare {
 		return "Pista";
 	}
 
+	public int getNrAeronave() {
+		return this.nrAeronave;
+	}
+
 	public boolean addAeronava(Aeronava a) {
 		if (this.nrAeronave > 0) {
 			for (int i = 0; i < this.nrAeronave; i++)
@@ -146,6 +166,12 @@ class Pista implements Stocare {
 		this.nrAeronave++;
 		return true;
 	}
+
+	public void printAeronave() {
+		System.out.println(getType() + " " + getNumber() + " are: ");
+		for (int i = 0; i < this.nrAeronave; i++)
+			System.out.println(aeronave[i].getName() + " " + aeronave[i].getType());
+	}
 }
 
 public class Aeroport {
@@ -157,17 +183,16 @@ public class Aeroport {
 		System.out.print("File name: ");
 		Scanner read = new Scanner(System.in);
 		String fileName = new String();
-		fileName = read.next();
-		read.close();
+		fileName = read.nextLine();
 		try {
 			File file = new File(fileName);
 			if (file.createNewFile()) {
-				System.out.println("New file created.");
+				System.out.println("A fost creat un nou fisier.");
 			} else {
-				System.out.println("File already exists. Loading information.");
+				System.out.println("Fisierul exista deja.");
 				Scanner fileReader = new Scanner(file);
 				if (!fileReader.hasNextLine())
-					System.out.println("File is empty.");
+					System.out.println("Fisierul este gol.");
 				else {
 					while (fileReader.hasNextLine()) {
 						String line = new String();
@@ -197,22 +222,24 @@ public class Aeroport {
 							}
 							numarStoc++;
 						}
-					}//WHILE
+					} // WHILE
 				}
-				fileReader.close();	
+				fileReader.close();
 			}
 		} catch (IOException exception) {
 			System.err.println(exception);
 		}
-		String rasp=new String();
-		rasp="da";
-		Scanner readRasp=new Scanner(System.in);
-		System.out.println("Introduceti nava in formatul: <hangar/pista> <numar> <avion/elicopter> <militar/agrement/...>");
-		while(rasp.equalsIgnoreCase("da")){
-			deStocat[0]=readRasp.next();
-			deStocat[1]=readRasp.next();
-			deStocat[2]=readRasp.next();
-			deStocat[3]=readRasp.next();
+		String rasp = new String();
+		System.out.println("Introduceti date noi? (da/nu)");
+		rasp = read.nextLine();
+		if (rasp.equals("da"))
+			System.out.println(
+					"Introduceti nava in formatul: <hangar/pista> <numar> <avion/elicopter> <militar/agrement/...>");
+		while (rasp.equalsIgnoreCase("da")) {
+			deStocat[0] = read.next();
+			deStocat[1] = read.next();
+			deStocat[2] = read.next();
+			deStocat[3] = read.nextLine();
 			if (deStocat[0].equalsIgnoreCase("hangar")) {
 				stoc[numarStoc] = new Hangar(deStocat[1]);
 				if (deStocat[2].equalsIgnoreCase("avion")) {
@@ -237,9 +264,21 @@ public class Aeroport {
 				}
 				numarStoc++;
 			}
-			//DE SCRIS IN FISIER
+			try {
+				FileWriter fileWriter = new FileWriter(fileName, true);
+				fileWriter.write(deStocat[0]+" ");
+				fileWriter.write(deStocat[1]+" ");
+				fileWriter.write(deStocat[2]+" ");
+				fileWriter.write(deStocat[3]+"\n");
+				fileWriter.close();
+			} catch (IOException excep) {
+				System.err.println(excep);
+			}
 			System.out.println("Continuati? (da/nu)");
-			rasp=readRasp.nextLine();
-		}
-	}
+			rasp = read.nextLine();
+		} // READ WHILE
+		for (int i = 0; i < numarStoc; i++)
+			stoc[i].printAeronave();
+		read.close();
+	}//MAIN
 }
